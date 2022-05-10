@@ -26,3 +26,6 @@ spring:
     properties:
       hibernate:
          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwtSecret: mySecret
+jwtExpiration: 86400000
