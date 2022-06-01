@@ -8,14 +8,19 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.example.demo.config.FirebaseConfig;
+import com.example.demo.exeptions.NotFoundException;
+import com.example.demo.models.Appointment;
 import com.example.demo.models.dto.AppointmentDTO;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -25,10 +30,17 @@ public class AppointmentServiceImp implements ApppointmentService<AppointmentDTO
   @Autowired
   private FirebaseConfig firebase;
 
+  @Value("${firestore.collection.dance}")
+  private String danceCollection;
+
   @Override
   public AppointmentDTO findById(String id) throws IOException, InterruptedException, ExecutionException {
     AppointmentDTO appointment = new AppointmentDTO();
-    ApiFuture<DocumentSnapshot> query = firebase.firestore().collection("dance").document(id).get();
+    ApiFuture<DocumentSnapshot> query = firebase
+      .firestore()
+      .collection(danceCollection)
+      .document(id)
+      .get();
 
     Map<String, Object> result = query.get().getData();
     
@@ -53,7 +65,10 @@ public class AppointmentServiceImp implements ApppointmentService<AppointmentDTO
   public List<AppointmentDTO> findAll() throws IOException, InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     List<AppointmentDTO> result = new ArrayList<AppointmentDTO>();
     
-    ApiFuture<QuerySnapshot> query = firebase.firestore().collection("dance").get();
+    ApiFuture<QuerySnapshot> query = firebase
+      .firestore()
+      .collection(danceCollection)
+      .get();
     
     List<QueryDocumentSnapshot> documents = query.get().getDocuments();
 
@@ -67,15 +82,45 @@ public class AppointmentServiceImp implements ApppointmentService<AppointmentDTO
   }
 
   @Override
-  public AppointmentDTO create(AppointmentDTO entity) {
-    // TODO Auto-generated method stub
-    return null;
+  public AppointmentDTO create(AppointmentDTO entity) throws IOException {
+    Appointment newAppointment = new Appointment();
+    newAppointment.setEmail(entity.getEmail());
+    newAppointment.setHour(entity.getHour());
+    newAppointment.setDate(entity.getDate());
+
+    ApiFuture<DocumentReference> future = firebase.firestore().collection(danceCollection).add(newAppointment);
+
+    
+    try {
+      entity.setId(future.get().getId());
+    } catch (Exception e) {
+      throw new Error();
+    }
+    return entity;
   }
 
   @Override
-  public AppointmentDTO update(AppointmentDTO id, AppointmentDTO entity) {
-    // TODO Auto-generated method stub
-    return null;
+  public AppointmentDTO update(String id, AppointmentDTO entity) {
+    try {
+      AppointmentDTO currAppointment = this.findById(id);
+
+      if (currAppointment == null) {
+        throw new NotFoundException();
+      }
+
+      currAppointment.setEmail(entity.getEmail());
+      currAppointment.setHour(entity.getHour());
+      currAppointment.setDate(entity.getDate());
+
+      ApiFuture<WriteResult> future = firebase.firestore().collection(danceCollection).document(id).set(currAppointment);
+      
+      System.out.println("[Update time]: " + future.get().getUpdateTime());
+
+      return currAppointment;
+      
+    } catch (Exception e) {
+      throw new InternalError();
+    }
   }
 
   @Override

@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
@@ -23,10 +24,19 @@ public class FirebaseConfig {
       .setCredentials(GoogleCredentials.fromStream(serviceAccount))
       .setDatabaseUrl("https://testing-a7743.firebaseio.com")
       .build();
+
+    FirebaseApp firebaseApp = null;
+    List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+    if(firebaseApps!=null && !firebaseApps.isEmpty()){
+        for(FirebaseApp app : firebaseApps){
+            if(app.getName().equals(FirebaseApp.DEFAULT_APP_NAME))
+                firebaseApp = app;
+        }
+    }
+    else
+        firebaseApp = FirebaseApp.initializeApp(options);  
     
-    FirebaseApp myApp = FirebaseApp.initializeApp(options);
-    
-    return FirestoreClient.getFirestore(myApp);
+    return FirestoreClient.getFirestore(firebaseApp);
   }
 
 }

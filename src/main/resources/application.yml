@@ -8,6 +8,13 @@ management:
         include: "*"
 
 spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/angelog05/java-spring-firestore.git
+          basedir: target/config
+          default-label: main
   data:
     jpa:
       repositories:
@@ -29,3 +36,6 @@ spring:
 
 jwtSecret: mySecret
 jwtExpiration: 86400000
+firestore:
+  collection:
+    dance: "dance-spring"

@@ -5,14 +5,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import javax.validation.Valid;
+
 import com.example.demo.exeptions.NotFoundException;
+import com.example.demo.models.Appointment;
 import com.example.demo.models.dto.AppointmentDTO;
 import com.example.demo.services.AppointmentServiceImp;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -61,25 +70,25 @@ public class AppointmentController {
   //   throw new NotFoundException();
   // }
 
-  // @PutMapping("/{id}")
-  // public Applicant update(@Valid @PathVariable Integer id, @RequestBody ApplicantDTO applicant) {
-  //   Applicant currentApplicant = new Applicant();
-  //   currentApplicant.setName(applicant.getName());
-  //   currentApplicant.setLastName(applicant.getLastName());
-  //   currentApplicant.setRut(applicant.getRut());
+  @PutMapping("/{id}")
+  public AppointmentDTO update(@Valid @PathVariable String id, @RequestBody Appointment appointment) {
+    AppointmentDTO currAppointment = new AppointmentDTO();
+    currAppointment.setEmail(appointment.getEmail());
+    currAppointment.setHour(appointment.getHour());
+    currAppointment.setDate(appointment.getDate());
 
-  //   return service.update(id, currentApplicant);
-  // }
+    return service.update(id, currAppointment);
+  }
 
-  // @PostMapping()
-  // @ResponseStatus(HttpStatus.CREATED)
-  // public @ResponseBody Applicant create(@Valid @RequestBody ApplicantDTO applicant) {
-  //   Applicant currentApplicant = new Applicant();
-  //   currentApplicant.setName(applicant.getName());
-  //   currentApplicant.setLastName(applicant.getLastName());
-  //   currentApplicant.setRut(applicant.getRut());
+  @PostMapping()
+  @ResponseStatus(HttpStatus.CREATED)
+  public @ResponseBody AppointmentDTO create(@Valid @RequestBody Appointment appointment) throws IOException {
+    AppointmentDTO currAppointment = new AppointmentDTO();
+    currAppointment.setEmail(appointment.getEmail());
+    currAppointment.setHour(appointment.getHour());
+    currAppointment.setDate(appointment.getDate());
     
-  //   return service.create(currentApplicant);
-  // }
+    return service.create(currAppointment);
+  }
 
 }
